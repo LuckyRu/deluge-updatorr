@@ -21,6 +21,9 @@ class BaseTrackerHandler(object):
     # This tells Updatorr that login procedure is required.
     login_required = True
 
+    # use Referer header in get_resource method when required
+    referer = None
+
     def __init__(self, tracker_host, torrent_data, logger):
         # Torrent tracker host this handler is associated with.
         self.tracker_host = tracker_host
@@ -81,8 +84,10 @@ class BaseTrackerHandler(object):
             form_data = urlencode(form_data)
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.get_cookies()))
-        request = urllib2.Request(url, form_data,
-                                  {'User-agent': 'Mozilla/5.0 (Ubuntu; X11; Linux i686; rv:8.0) Gecko/20100'})
+        headers = {'User-agent': 'Mozilla/5.0 (Ubuntu; X11; Linux i686; rv:8.0) Gecko/20100'}
+        if (self.referer):
+            headers['Referer'] = self.referer
+        request = urllib2.Request(url, form_data, headers)
 
         try:
             response = opener.open(request)
